@@ -18,6 +18,7 @@ import { Pool } from 'pg'
     implements OnModuleInit, OnModuleDestroy {
 
     constructor() {
+        console.log('database url:', process.env.DATABASE_URL)
       // Prisma 7 必须通过 adapter 连接数据库
       // 第一步：创建 pg 连接池（Pool 负责管理数据库连接）
       const pool = new Pool({
