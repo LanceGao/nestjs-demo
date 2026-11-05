@@ -1,4 +1,18 @@
-node_modules
-dist/*
-/src/generated/prisma
+# .gitignore
+
+# 依赖包（服务器会重新安装）
+node_modules/
+
+# 编译产物（服务器会重新编译）
+dist/
+
+# 环境变量（敏感信息，绝对不能提交）
 .env
+.env.production
+
+# Prisma 生成的 Client（服务器会重新生成）
+src/generated/
+
+# 日志文件
+*.log
+npm-debug.log*
