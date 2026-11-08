@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { PostService } from './post/post.service.js';
 import { PostModule } from './post/post.module.js';
 import { ModelsModule } from './models/models.module.js';
+import { PromptsModule } from './prompts/prompts.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -23,6 +24,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     PrismaModule,
     PostModule,
     ModelsModule,
+    PromptsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PostService],
