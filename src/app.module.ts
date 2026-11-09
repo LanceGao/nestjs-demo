@@ -10,6 +10,7 @@ import { ModelsModule } from './models/models.module.js';
 import { PromptsModule } from './prompts/prompts.module.js';
 import { ChainsModule } from './chains/chains.module.js';
 import { AgentsModule } from './agents/agents.module.js';
+import { MemoryModule } from './memory/memory.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -29,6 +30,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     PromptsModule,
     ChainsModule,
     AgentsModule,
+    MemoryModule,
   ],
   controllers: [AppController],
   providers: [AppService, PostService],
