@@ -63,7 +63,7 @@ export class PromptsService {
         }]
         // 格式化示例
         const examplePrompt = PromptTemplate.fromTemplate('输入：{input}\n输出：{output}')
-        // 格式化输入
+        // 格式化输入，根据示例格式，判断文本的类别，输出为字符串，包含类别，
         const fewShotPrompt = new FewShotPromptTemplate({
             examples, // 样本示例数组
             examplePrompt, // 格式化示例的模板

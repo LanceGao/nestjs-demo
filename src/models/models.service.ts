@@ -91,7 +91,7 @@ export class ModelsService {
         // chain.invoke(message) 返回字符串，无需解析
         const answer = await chain.invoke(message)
         console.log('parser-res', message, answer)
-        return {
+        return {  
             question: message,
             answer,
         }

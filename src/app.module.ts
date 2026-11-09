@@ -9,6 +9,7 @@ import { PostModule } from './post/post.module.js';
 import { ModelsModule } from './models/models.module.js';
 import { PromptsModule } from './prompts/prompts.module.js';
 import { ChainsModule } from './chains/chains.module.js';
+import { AgentsModule } from './agents/agents.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -27,6 +28,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     ModelsModule,
     PromptsModule,
     ChainsModule,
+    AgentsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PostService],
