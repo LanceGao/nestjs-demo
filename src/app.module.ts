@@ -11,6 +11,7 @@ import { PromptsModule } from './prompts/prompts.module.js';
 import { ChainsModule } from './chains/chains.module.js';
 import { AgentsModule } from './agents/agents.module.js';
 import { MemoryModule } from './memory/memory.module.js';
+import { RagModule } from './rag/rag.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -31,6 +32,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     ChainsModule,
     AgentsModule,
     MemoryModule,
+    RagModule,
   ],
   controllers: [AppController],
   providers: [AppService, PostService],
