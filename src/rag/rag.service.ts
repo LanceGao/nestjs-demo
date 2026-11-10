@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ChatOllama, OllamaEmbeddings } from '@langchain/ollama';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { StringOutputParser } from '@langchain/core/output_parsers';
 import { MemoryVectorStore } from '@langchain/classic/vectorstores/memory';
 import { Document } from '@langchain/core/documents';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
@@ -11,7 +13,9 @@ export class RagService {
     private llm = new ChatOllama({
         model: config.ollama.chatModel,
         baseUrl: config.ollama.baseUrl,
-        temperature: config.ollama.temperature
+        temperature: config.ollama.temperature,
+        think: false,
+        numPredict: 1024
     })
     // 向量化模型：把文本转成数字向量（用于相似度比较）
     private embedings = new OllamaEmbeddings({
@@ -25,8 +29,8 @@ export class RagService {
     async loadDocuments(documents: { id: string, source: string, content: string}[]) {
         // 文档分割器：把文档内容分割成多个 chunks
         const textSplitter = new RecursiveCharacterTextSplitter({
-            chunkSize: 80,
-            chunkOverlap: 20,
+            chunkSize: 90,
+            chunkOverlap: 40,
             separators: ['\n\n', '\n', '。', '！', '？', '，', ' ', ''],
         })
         const allDocs: Document[] = []
@@ -48,12 +52,94 @@ export class RagService {
             allDocs,
             this.embedings,
         )
-        this.docCount = allDocs.length
+        this.docCount = documents.length
         return {
             success: true,
-            docCount: this.docCount,
-            documents: documents.length,
-            message: `加载${documents.length} 篇文档，共 ${this.docCount} 个chunks`
+            totalChunks: allDocs.length,
+            documentsLength: documents.length,
+            message: `加载${documents.length}篇文档，共${allDocs.length}个chunks`
+        }
+    }
+    getStatus() {
+        if (!this.vectorStore) {
+            return {
+                success: true,
+                message: '向量库未初始化'
+            }
+        }
+        return {
+            success: true,
+            documentsLength: this.docCount || 0,
+            message: `向量库已初始化，共${this.docCount}个文档`
+        }
+    }
+    // ── 纯向量检索（不过大模型，直接看检索结果） ───────────────────────────────────
+    async search(question: string, topK: number = 3) {
+        if (!this.vectorStore) {
+            return {
+                success: false,
+                message: '向量库未初始化'
+            }
+        }
+        // similaritySearchWithScore 内部流程：
+        // 1. 把 question 向量化（调用 embeddings.embedQuery）
+        // 2. 和向量库里所有文档向量计算余弦相似度
+        // 3. 按相似度排序，返回前 topK 个文档
+        const results = await this.vectorStore.similaritySearchWithScore(question, topK)
+        return {
+            success: true,
+            question,
+            result: results.map(([item, score]) => ({
+                source: item.metadata.source,
+                content: item.pageContent,
+                score: score.toFixed(4), // 越高表示越相关（0-1）
+            })),
+            message: `找到${results.length}个相关文档`
+        }
+    }
+    async searchFromVector(question: string, topK: number = 3) {
+        if (!this.vectorStore) {
+            return {
+                success: false,
+                message: '向量库未初始化'
+            }
+        }
+        const results = await this.vectorStore.similaritySearchWithScore(question, topK)
+        if (!results.length) {
+            return {
+                success: false,
+                message: '未找到相关文档'
+            }
+        }
+        const context = results.map(([doc], index) => {`[${index + 1}] ${doc.pageContent}`}).join('\n\n')
+        const prompt = ChatPromptTemplate.fromMessages([
+            [
+                'system',
+                `你是知识库问答助手，严格基于参考资料回答。
+                规则：
+                1. 只根据参考资料内容回答，不能使用资料外的知识
+                2. 资料中没有相关信息，回答"知识库中暂无相关内容"
+                3. 回答简洁准确，使用中文
+
+                参考资料：
+                {context}`,
+            ],
+            ['human', '{question}'],
+        ])
+        const chain = prompt.pipe(this.llm).pipe(new StringOutputParser())
+        const answer = await chain.invoke({context, question})
+        return {
+            question,
+            answer,
+            sources: results.map(([doc, score]) => ({content: doc.pageContent, source: doc.metadata.source, score: score.toFixed(4)})),
+        }
+    }
+    clear() {
+        this.vectorStore = null
+        this.docCount = 0
+        return {
+            success: true,
+            message: '向量库已清空'
         }
     }
 }
