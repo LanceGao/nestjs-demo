@@ -12,6 +12,7 @@ import { ChainsModule } from './chains/chains.module.js';
 import { AgentsModule } from './agents/agents.module.js';
 import { MemoryModule } from './memory/memory.module.js';
 import { RagModule } from './rag/rag.module.js';
+import { FunctionCallingModule } from './function-calling/function-calling.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -33,6 +34,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     AgentsModule,
     MemoryModule,
     RagModule,
+    FunctionCallingModule,
   ],
   controllers: [AppController],
   providers: [AppService, PostService],
