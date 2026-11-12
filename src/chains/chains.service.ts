@@ -10,7 +10,7 @@ export class ChainsService {
     private llm = new ChatOllama({
         model: config.ollama.chatModel,
         baseUrl: config.ollama.baseUrl,
-        temperature: 0.3,
+        temperature: 0.5,
         numPredict: 512,
         think: false,
     })
@@ -70,25 +70,26 @@ export class ChainsService {
     async smartRouter(question: string) {
         // 、分析用户问题，分类问题
         const prompt = ChatPromptTemplate.fromMessages([
-            ['system', `分析用户的问题，只输出以下问题的分类: 
-                技术问题-TECH
-                订单问题-ORDER
-                退款问题-REFUND
-                投诉建议-SUGGESTION
-                其他问题-OTHER
+            ['system', `分析用户的问题，只输出以下问题的分类:
+                技术问题 -> TECH
+                订单问题 -> ORDER
+                退款问题 -> REFUND
+                投诉建议 -> SUGGESTION
+                其他问题 -> OTHER
             `],
             ['human', '用户问题：{question}'],
         ]).pipe(this.llm).pipe(new StringOutputParser())
         const category = await prompt.invoke({ question })
+        console.log('prompt', category)
         // 、根据分类，路由到不同的处理链
         const categoryMap: Record<string, string> = {
-            '技术问题-TECH': '你是一个专业的技术支持助手，帮助用户解决技术问题',
-            '订单问题-ORDER': '你是一个专业的订单问题助手，帮助用户解决订单问题',
-            '退款问题-REFUND': '你是一个专业的退款问题助手，帮助用户解决退款问题',
-            '投诉建议-SUGGESTION': '你是一个专业的投诉建议助手，帮助用户解决投诉建议问题',
-            '其他问题-OTHER': '你是一个专业的其他问题助手，帮助用户解决各种问题',
+            'TECH': '你是一个专业的技术支持助手，给用户具体的解决步骤',
+            'ORDER': '你是一个专业的订单问题助手，帮助用户解决订单问题',
+            'REFUND': '你是一个专业的退款问题助手，引导用户完成退款流程',
+            'SUGGESTION': '你是一个专业的投诉建议助手，引导用户提交投诉建议问题',
+            'OTHER': '你是一个通用的客服助手，友好回答用户的各类问题',
         }
-        const categorySystem = categoryMap[category] || categoryMap['其他问题-OTHER']
+        const categorySystem = categoryMap[category] || categoryMap['OTHER']
         console.log('category', category, categorySystem)
         // 、根据分类，调用不同的处理链
         const questionPrompt = ChatPromptTemplate.fromMessages([
