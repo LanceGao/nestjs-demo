@@ -13,6 +13,7 @@ import { AgentsModule } from './agents/agents.module.js';
 import { MemoryModule } from './memory/memory.module.js';
 import { RagModule } from './rag/rag.module.js';
 import { FunctionCallingModule } from './function-calling/function-calling.module.js';
+import { RagDbModule } from './rag-db/rag-db.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -35,6 +36,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     MemoryModule,
     RagModule,
     FunctionCallingModule,
+    RagDbModule,
   ],
   controllers: [AppController],
   providers: [AppService, PostService],

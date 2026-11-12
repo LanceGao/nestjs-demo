@@ -104,6 +104,7 @@ export class RagService {
                 message: '向量库未初始化'
             }
         }
+        // Step 1：检索相关文档块
         const results = await this.vectorStore.similaritySearchWithScore(question, topK)
         if (!results.length) {
             return {
@@ -111,7 +112,11 @@ export class RagService {
                 message: '未找到相关文档'
             }
         }
+        // Step 2：把检索结果拼成 context 字符串
+        // [1] 第一块内容\n\n[2] 第二块内容...
+        // 编号方便模型在回答时引用："根据[1]..."
         const context = results.map(([doc], index) => {`[${index + 1}] ${doc.pageContent}`}).join('\n\n')
+        // Step 3：RAG Prompt，严格限制模型只能用参考资料回答
         const prompt = ChatPromptTemplate.fromMessages([
             [
                 'system',
@@ -126,12 +131,19 @@ export class RagService {
             ],
             ['human', '{question}'],
         ])
+        // Step 4：调用模型生成回答
         const chain = prompt.pipe(this.llm).pipe(new StringOutputParser())
         const answer = await chain.invoke({context, question})
         return {
             question,
             answer,
-            sources: results.map(([doc, score]) => ({content: doc.pageContent, source: doc.metadata.source, score: score.toFixed(4)})),
+            sources: results.map(([doc, score]) => (
+                {
+                    content: doc.pageContent,
+                    source: doc.metadata.source,
+                    score: score.toFixed(4)
+                }
+            )),
         }
     }
     clear() {
