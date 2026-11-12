@@ -17,7 +17,12 @@ export class MemoryService {
     // 会话存储：sessionId → 消息历史数组
     // NestJS Service 是单例，Map 在整个应用生命周期内存在
     private sessions = new Map<string, BaseMessage[]>()
-    private systemMessage = new HumanMessage('你是一个智能助手，可以记住对话历史，根据上下文准确回答')
+    private systemMessage = new SystemMessage('你是一个智能助手，可以记住对话历史，根据上下文准确回答')
+
+    // 统一：统计用户实际提问次数（不含 SystemMessage）
+    private countUserTurns(history: BaseMessage[]) {
+        return history.filter(m => m instanceof HumanMessage).length
+    }
     private getOrCreateSession(sessionId: string) {
         if (!(this.sessions.has(sessionId))) {
             // 新会话：初始化时加入 SystemMessage
@@ -40,7 +45,7 @@ export class MemoryService {
             message,
             sessionId,
             answer: res.content,
-            turns: Math.floor(history.length / 2) // 对话轮数
+            turns: this.countUserTurns(history)
         }
     }
     async getSessionHistory(sessionId: string) {
@@ -56,6 +61,7 @@ export class MemoryService {
         return {
             sessionId,
             exist: true,
+            turns: this.countUserTurns(history), // 用户提问次数
             historyMessages: messages
         }
     }
@@ -70,7 +76,7 @@ export class MemoryService {
     getSessionList() {
         const sessions = Array.from(this.sessions.entries()).map(([sessionId, history]) => ({
             sessionId,
-            turns: Math.floor(history.length / 2) // 对话轮数
+            turns: this.countUserTurns(history)
         }))
         return {
             sessions,
@@ -91,11 +97,11 @@ export class MemoryService {
             if (chunk.content) {
                 const text = String(chunk.content)
                 fullAnswer += text
-                res.write(`data: ${JSON.stringify({text, turns: Math.floor(history.length / 2)})})}\n\n`)
+                res.write(`data: ${JSON.stringify({text, turns: this.countUserTurns(history)})}\n\n`)
             }
         }
         history.push(new AIMessage(fullAnswer))
-        res.write(`data: ${JSON.stringify({text: 'done', turns: Math.floor(history.length / 2)})})}\n\n`)
+        res.write(`data: ${JSON.stringify({text: 'done', turns: this.countUserTurns(history)})}\n\n`)
         res.end()
     }
 }
