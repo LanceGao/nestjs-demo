@@ -19,10 +19,10 @@ export class McpClientService implements OnModuleInit, OnModuleDestroy {
         })
         this.client = new Client(
             {name: 'nestjs-mcp-client', version: '1.0.0'},
-            {capabilities: {}},
+            {capabilities: {}}, // 客户端能力，如支持的工具类型
         )
         await this.client.connect(this.transport)
-        console.log('✅ MCP Client 已连接到 MCP Server')
+        console.log('✅ [MCP Client] 已连接到 [MCP Server]')
     }
     // ── 获取所有可用工具列表 ──────────────────────────
     async getToolList() {
@@ -33,9 +33,20 @@ export class McpClientService implements OnModuleInit, OnModuleDestroy {
             inputSchema: tool.inputSchema
         }))
     }
+    // ── 调用指定工具 ──────────────────────────────────
+    async callTool(toolName: string, args: any) {
+        const response = await this.client.callTool({name: toolName, arguments: args})
+        return {
+            toolName,
+            args,
+            content: response.content,
+            isError: response.isError ?? false,
+        }
+    }
+    
     // ── 应用退出时断开连接 ─────────────────────────────
     async onModuleDestroy() {
         await this.client.close()
-        console.log('✅ MCP Client 已断开连接')
+        console.log('✅ [MCP Client] 已断开连接')
     }
 }

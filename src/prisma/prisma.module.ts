@@ -13,6 +13,6 @@ import { PrismaService } from './prisma.service.js'
 @Global()
   @Module({
     providers: [PrismaService],
-    exports: [PrismaService],
+    exports: [PrismaService], // 导出供其他模块使用
   })
   export class PrismaModule {}

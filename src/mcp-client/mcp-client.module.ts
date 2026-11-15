@@ -4,6 +4,7 @@ import { McpClientService } from './mcp-client.service.js';
 
 @Module({
   controllers: [McpClientController],
-  providers: [McpClientService]
+  providers: [McpClientService],
+  exports: [McpClientService], // 导出供其他模块使用
 })
 export class McpClientModule {}
