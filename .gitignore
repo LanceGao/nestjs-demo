@@ -14,6 +14,8 @@ dist/
 # Prisma 生成的 Client（服务器会重新生成）
 src/generated/
 
+echo ".env.docker" >> .gitignore
+
 # 日志文件
 *.log
 npm-debug.log*
