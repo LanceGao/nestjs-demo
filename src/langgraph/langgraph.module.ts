@@ -1,0 +1,13 @@
+import { Module } from '@nestjs/common';
+import { LanggraphController } from './langgraph.controller.js';
+import { LanggraphService } from './langgraph.service.js';
+import { ArticleService } from './article.service.js';
+import { ReactAgentService } from './react-agent.service.js';
+import { RoutingService } from './routing.service.js';
+import { ParallelService } from './parallel.service.js';
+
+@Module({
+  controllers: [LanggraphController],
+  providers: [LanggraphService, ArticleService, ReactAgentService, RoutingService, ParallelService]
+})
+export class LanggraphModule {}
