@@ -4,6 +4,9 @@ import { ArticleService } from './article.service.js';
 import { ReactAgentService } from './react-agent.service.js';
 import { RoutingService } from './routing.service.js';
 import { ParallelService } from './parallel.service.js';
+import { SupervisorService } from './supervisor.service.js';
+import { PipelineService } from './pipeline.service.js';
+import { CodeReviewService } from './code-review.service.js';
 
 @Controller('langgraph')
 export class LanggraphController {
@@ -12,7 +15,10 @@ export class LanggraphController {
         private readonly articleService: ArticleService,
         private readonly reactAgentService: ReactAgentService,
         private readonly routingService: RoutingService,
-        private readonly parallelService: ParallelService
+        private readonly parallelService: ParallelService,
+        private readonly supervisorService: SupervisorService,
+        private readonly pipelineService: PipelineService,
+        private readonly codeReviewService: CodeReviewService,
     ) {}
     @Post('simple-chat')
     simpleChat(@Body() body: { message: string }) {
@@ -41,5 +47,17 @@ export class LanggraphController {
     @Post('parallel')
     parallel(@Body() body: { message: string }) {
         return this.parallelService.parallel(body.message);
+    }
+    @Post('supervisor-agent')
+    supervisorAgent(@Body() body: { message: string }) {
+        return this.supervisorService.supervisorAgent(body.message);
+    }
+    @Post('code-review')
+    codeReview(@Body() body: { code: string, language: string }) {
+        return this.codeReviewService.codeReview(body.code, body.language);
+    }
+    @Post('create-content')
+    createContent(@Body() body: { topic: string }) {
+        return this.pipelineService.createContent(body.topic);
     }
 }

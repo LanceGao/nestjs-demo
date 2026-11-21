@@ -5,9 +5,21 @@ import { ArticleService } from './article.service.js';
 import { ReactAgentService } from './react-agent.service.js';
 import { RoutingService } from './routing.service.js';
 import { ParallelService } from './parallel.service.js';
+import { SupervisorService } from './supervisor.service.js';
+import { PipelineService } from './pipeline.service.js';
+import { CodeReviewService } from './code-review.service.js';
 
 @Module({
   controllers: [LanggraphController],
-  providers: [LanggraphService, ArticleService, ReactAgentService, RoutingService, ParallelService]
+  providers: [
+    LanggraphService,
+    ArticleService,
+    ReactAgentService,
+    RoutingService,
+    ParallelService,
+    SupervisorService,
+    PipelineService,
+    CodeReviewService,
+  ],
 })
 export class LanggraphModule {}
